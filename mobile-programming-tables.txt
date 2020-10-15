@@ -1,0 +1,10 @@
+CREATE TABLE USERS(
+    USER_ID varchar(20) NOT NULL,
+    USER_FN varchar (50) NOT NULL,
+    USER_LN varchar (50) NOT NULL,
+    USER_EMAIL varchar(50) NOT NULL,
+    USER_ACTIVE int NOT NULL,
+    USER_SEX  varchar(1)  NOT NULL,
+    PRIMARY KEY (USER_ID)
+)
+
