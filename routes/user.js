@@ -22,7 +22,7 @@ router.route("/getUser").get(async (req, res, next) => {
       console.log("ERROR", error);
       return res.status(400).send({
         isError: true,
-        result: error.message,
+        result: error===null?"user not in db":error,
       });
     } else {
       console.log("The solution is: ", results);
