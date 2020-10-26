@@ -31,3 +31,8 @@ app.listen(PORT,  err=>{
  * 3) UPDATE A USER
  * 4) DELETE A USER
  */
+
+//  {
+//      "bool":false,
+//      "actual_msg":err.msg
+//  }
