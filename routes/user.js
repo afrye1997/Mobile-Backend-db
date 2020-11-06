@@ -11,7 +11,7 @@ router.route("/getUser").get(async (req, res, next) => {
   //so param is called USER_id
   const USER_id = req.query.USER_id;
   console.log(USER_id);
-  connection.query(`SELECT * FROM USER WHERE USER_id='${USER_id}';`, function (
+  connection.query(`SELECT * FROM USERS WHERE userID='${USER_id}';`, function (
     error,
     results,
     fields
@@ -36,12 +36,17 @@ router.route("/getUser").get(async (req, res, next) => {
 
 router.route("/addUser").post(async (req, res, next) => {
   console.log("addUser was called");
-  const { USER_id, USER_fName, USER_LName, USER_email, USER_sex } = req.body;
+  const {USER} = req.body;
+  // const classes= USER.studentClasses.join(); 
+  // console.log(classes)
+ 
+  const INSERT_USER_QUERY = `INSERT INTO  USERS (userID, userFNAME, userLNAME, userEMAIL, userCLASSES) 
+  VALUES ('${USER.uid}', '${USER.givenName}','${USER.sn}','${USER.mail}', '${USER.studentClasses}')`;
 
-  // const INSERT_USER_QUERY = `INSERT INTO  USER (USER_id, USER_fName, USER_LName, USER_email, USER_sex, USER_FIRST_LOGON)
-  //                              VALUES ('${USER_id}', '${USER_fName}','${USER_LName}','${USER_email}', '${USER_sex}', 1)`;
-  const INSERT_USER_QUERY = `INSERT INTO  USER (USER_id, USER_fName, USER_LName, USER_email, USER_FIRST_LOGON)
-  VALUES ('${USER_id}', '${USER_fName}','${USER_LName}','${USER_email}', 1)`;
+
+
+
+
   connection.query(INSERT_USER_QUERY, function (error, results) {
     if (error)
       return res.status(400).send({
@@ -50,8 +55,8 @@ router.route("/addUser").post(async (req, res, next) => {
       });
     else {
       console.log(results);
-      console.log(USER_fName + " was added!");
-      var response = USER_fName + " was added!";
+      console.log(USER.uid + " was added!");
+      var response = USER.uid + " was added!";
       return res.status(200).send({
         isError: false,
         result: response,
