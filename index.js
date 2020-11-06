@@ -21,7 +21,7 @@ app.listen(PORT,  err=>{
    if (err)
        return  console.log("ERROR", err);
    else
-       console.log(`listening on port ${PORT}`)
+       console.log("CRUD API running")
 });
 
 //TODO
