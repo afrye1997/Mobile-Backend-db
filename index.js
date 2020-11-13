@@ -17,11 +17,8 @@ app.get("/", (req,res)=>{
     res.send("CRUD API running")
 });
 
-app.listen(PORT,  err=>{
-   if (err)
-       return  console.log("ERROR", err);
-   else
-       console.log(`listening on port ${PORT}`)
+app.listen(PORT,  err=>{ 
+    (err? console.log("ERROR", err):console.log("CRUD API running") )
 });
 
 //TODO

@@ -17,7 +17,6 @@ router.route("/getUser").get(async (req, res, next) => {
     fields
   ) {
     //if error or user does not exist in db
-
     if (error || Object.entries(results).length === 0) {
       console.log("ERROR", error);
       return res.status(400).send({
@@ -36,16 +35,10 @@ router.route("/getUser").get(async (req, res, next) => {
 
 router.route("/addUser").post(async (req, res, next) => {
   console.log("addUser was called");
-  const {USER} = req.body;
-  // const classes= USER.studentClasses.join(); 
-  // console.log(classes)
- 
+  const { USER } = req.body;
+
   const INSERT_USER_QUERY = `INSERT INTO  USERS (userID, userFNAME, userLNAME, userEMAIL, userCLASSES) 
   VALUES ('${USER.uid}', '${USER.givenName}','${USER.sn}','${USER.mail}', '${USER.studentClasses}')`;
-
-
-
-
 
   connection.query(INSERT_USER_QUERY, function (error, results) {
     if (error)
@@ -56,7 +49,7 @@ router.route("/addUser").post(async (req, res, next) => {
     else {
       console.log(results);
       console.log(USER.uid + " was added!");
-      var response = USER.uid + " was added!";
+      const response = USER.uid + " was added!";
       return res.status(200).send({
         isError: false,
         result: response,
