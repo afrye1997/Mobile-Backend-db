@@ -61,7 +61,8 @@ router.route("/getUser").get(async (req, res, next) => {
 });
 
 /**
- *  {
+ *  
+ {
     "userID":"af027",
     "values":{
         "userHOMETOWN":"Kansas City",
