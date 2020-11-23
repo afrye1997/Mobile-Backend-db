@@ -35,7 +35,7 @@ router.route("/getUser").get(async (req, res, next) => {
 router.route("/addUser").post(async (req, res, next) => {
   console.log("addUser was called");
   const { USER } = req.body;
-  //13
+
   const INSERT_USER_QUERY = `INSERT INTO  USERS (userID, userFNAME, userLNAME, userEMAIL, userCLASSES) 
   VALUES ('${USER.uid}', '${USER.givenName}','${USER.sn}','${USER.mail}', '${USER.studentClasses}')`;
 
@@ -58,27 +58,8 @@ router.route("/addUser").post(async (req, res, next) => {
           result: response,
         });
       }
-      // `results` is an array with one element for every statement in the query:
     }
   );
-
-  // connection.query(CREATE_INTEREST_ENTRY, function (error, results) {
-  //   if (error){
-  //     console.log(error)
-  //     return res.status(400).send({
-  //       isError: true,
-  //       result: error.message,
-  //     });
-  //   }else {
-  //     console.log(results);
-  //     console.log(USER.uid + " was added!");
-  //     const response = USER.uid + " was added!";
-  //     return res.status(200).send({
-  //       isError: false,
-  //       result: response,
-  //     });
-  //   }
-  // });
 });
 
 module.exports = router;
