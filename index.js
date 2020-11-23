@@ -13,6 +13,10 @@ app.use(cors());
 const user= require ("./routes/user")
 app.use("/users", user);
 
+const interest= require ("./routes/interest")
+app.use("/interest", interest);
+
+
 app.get("/", (req,res)=>{
     res.send("CRUD API running")
 });

@@ -1,5 +1,5 @@
 /*
-Will hold all CRUD APIs for Users
+Will hold all CRUD APIs for Interests
 */
 
 "use  strict";
@@ -7,53 +7,70 @@ const express = require("express");
 const router = express.Router();
 var connection = require("../connection");
 
-// router.route("/getInterests").get(async (req, res, next) => {
-//   //so param is called USER_id
-//   const USER_id = req.query.USER_id;
-//   console.log(USER_id);
-//   connection.query(`SELECT * FROM USER WHERE USER_id='${USER_id}';`, function (
-//     error,
-//     results,
-//     fields
-//   ) {
-//     //if error or user does not exist in db
+/**
+ How to send it:
+ {
+    "interestUSER":"af027",
+    "values":{
+        "interestFOOD":"5",
+        "interestOUTDOORS":"5"
+    }
+ }
+ */
+/**
+ALL VALUES IN INTEREST TABLE
+	interestUSER ,
+	interestFOOD ,
+	interestFOOD_COMMENT ,
+	interestFASHION ,
+	interestFASHION_COMMENT ,
+	interestOUTDOORS ,
+	interestOUTDOORS_COMMENT,
+	interestGAMING ,
+	interestGAMING_COMMENT ,
+	interestMUSIC ,
+	interestMUSIC_COMMENT ,
+	interestREADING ,
+	interestREADING_COMMENT ,
+	constraint interestUSER_UNIQUE
+		unique (interestUSER)
+);
 
-//     if (error || Object.entries(results).length === 0) {
-//       console.log("ERROR", error);
-//       return res.status(400).send({
-//         isError: true,
-//         result: error===null?"user not in db":error,
-//       });
-//     } else {
-//       console.log("The solution is: ", results);
-//       res.status(200).send({
-//         isError: false,
-//         result: results,
-//       });
-//     }
-//   });
-// });
-
-router.route("/addInterests").post(async (req, res, next) => {
-  console.log("addUser was called");
-  const { USER_id, USER_fName, USER_LName, USER_email, USER_sex } = req.body;
+alter table INTERESTS
+	add primary key (interestUSER);
 
 
-  const INSERT_USER_QUERY = `INSERT INTO  USER (USER_id, USER_fName, USER_LName, USER_email, USER_FIRST_LOGON)
-  VALUES ('${USER_id}', '${USER_fName}','${USER_LName}','${USER_email}', 1)`;
-  connection.query(INSERT_USER_QUERY, function (error, results) {
-    if (error)
+ */
+router.route("/updateInterests").post(async (req, res, next) => {
+  console.log("updating interst");
+  const request = req.body;
+  var values = request.values;
+  var TABLE = "UPDATE INTERESTS";
+  var VALUES_TO_UPDATE = "SET ";
+  var USER = `WHERE interestUSER= "${request.interestUSER}"`;
+
+  for (column in values) {
+    var value = values[column];
+    VALUES_TO_UPDATE += `${column} = "${value}",`;
+  }
+  VALUES_TO_UPDATE = VALUES_TO_UPDATE.slice(0, -1);
+  console.log(VALUES_TO_UPDATE);
+
+  console.log("idk man", VALUES_TO_UPDATE);
+  const UPDATE_USER_IN_INTEREST = `${TABLE} 
+                                   ${VALUES_TO_UPDATE} 
+                                   ${USER}`;
+
+  connection.query(UPDATE_USER_IN_INTEREST, function (error, results, fields) {
+    if (error) {
       return res.status(400).send({
         isError: true,
-        result: error.message,
+        result: "Error in updating interests table",
       });
-    else {
-      console.log(results);
-      console.log(USER_fName + " was added!");
-      var response = USER_fName + " was added!";
-      return res.status(200).send({
+    } else {
+      res.status(200).send({
         isError: false,
-        result: response,
+        result: "Successfully updated",
       });
     }
   });
