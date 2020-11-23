@@ -25,13 +25,7 @@ app.listen(PORT,  err=>{
     (err===null? console.log("ERROR", err):console.log("CRUD API running") )
 });
 
-//TODO
-/**
- * 1) CREATE A USER
- * 2) READ A USER
- * 3) UPDATE A USER
- * 4) DELETE A USER
- */
+
 
 //  {
 //      "bool":false,

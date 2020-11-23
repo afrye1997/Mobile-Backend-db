@@ -34,6 +34,33 @@ alter table USERS
 
  */
 
+  //GET THE USER
+router.route("/getAllUsers").get(async (req, res, next) => {
+  //so param is called USER_id
+  const USER_id = req.query.USER_id;
+  console.log(USER_id);
+  connection.query(
+    "SELECT * FROM USERS",
+    function (error, results, fields) {
+      //if error or user does not exist in db
+      if (error || Object.entries(results).length === 0) {
+        console.log("ERROR", error);
+        return res.status(400).send({
+          isError: true,
+          result: error === null ? "No users in db" : error,
+        });
+      } else {
+        console.log("Ppl in the db:", results);
+        res.status(200).send({
+          isError: false,
+          result: results,
+        });
+      }
+    }
+  );
+});
+
+
  //GET THE USER
 router.route("/getUser").get(async (req, res, next) => {
   //so param is called USER_id
