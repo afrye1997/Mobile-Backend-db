@@ -41,6 +41,14 @@ alter table INTERESTS
 
 
  */
+router.route("/getInterests").get(async(req,res,next)=>{
+console.log("entered interests");
+return res.status(200).send({
+  isError: false,
+  result: "Some typa test",
+});
+
+})
 router.route("/updateInterests").post(async (req, res, next) => {
   console.log("updating interst");
   const request = req.body;
@@ -63,12 +71,14 @@ router.route("/updateInterests").post(async (req, res, next) => {
 
   connection.query(UPDATE_USER_IN_INTEREST, function (error, results, fields) {
     if (error) {
+      console.log("Interests was NOT successfully updated!")
       return res.status(400).send({
         isError: true,
         result: "Error in updating interests table",
       });
     } else {
-      res.status(200).send({
+      console.log("Interests was successfully updated!")
+      return res.status(200).send({
         isError: false,
         result: "Successfully updated",
       });

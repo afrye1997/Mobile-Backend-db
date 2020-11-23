@@ -44,13 +44,13 @@ router.route("/addUser").post(async (req, res, next) => {
   connection.query(
     `${INSERT_USER_QUERY}; ${CREATE_INTEREST_ENTRY}`,
     function (error, results, fields) {
+      console.log(USER.uid + " was an issue with adding to the db...");
       if (error) {
         return res.status(400).send({
           isError: true,
           result: error.message,
         });
       } else {
-        console.log(results);
         console.log(USER.uid + " was added along with the interests!");
         const response = USER.uid + " was added along with interests!";
         return res.status(200).send({

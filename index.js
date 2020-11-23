@@ -22,7 +22,7 @@ app.get("/", (req,res)=>{
 });
 
 app.listen(PORT,  err=>{ 
-    (err? console.log("ERROR", err):console.log("CRUD API running") )
+    (err===null? console.log("ERROR", err):console.log("CRUD API running") )
 });
 
 //TODO
