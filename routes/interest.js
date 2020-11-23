@@ -43,11 +43,29 @@ alter table INTERESTS
 
  */
 router.route("/getInterests").get(async(req,res,next)=>{
-console.log("entered interests");
-return res.status(200).send({
-  isError: false,
-  result: "Some typa test",
-});
+console.log("get interests");
+const USER_id = req.query.USER_id;
+const GET_INTERESTS_OF_USER= `SELECT * FROM INTERESTS WHERE interestUSER='${USER_id}'`; 
+
+connection.query(
+ GET_INTERESTS_OF_USER,
+  function (error, results, fields) {
+    //if error or user does not exist in db
+    if (error || Object.entries(results).length === 0) {
+      console.log("ERROR", error);
+      return res.status(400).send({
+        isError: true,
+        result: error
+      });
+    } else {
+      console.log("Have returned interests to client")
+      res.status(200).send({
+        isError: false,
+        result: results,
+      });
+    }
+  }
+);
 })
 
 
