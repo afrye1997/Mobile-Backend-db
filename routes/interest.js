@@ -33,7 +33,8 @@ ALL VALUES IN INTEREST TABLE
 	interestREADING ,
 	interestREADING_COMMENT ,
 	constraint interestUSER_UNIQUE
-		unique (interestUSER)
+    unique (interestUSER)
+
 );
 
 alter table INTERESTS
