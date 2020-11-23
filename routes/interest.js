@@ -48,8 +48,9 @@ return res.status(200).send({
   isError: false,
   result: "Some typa test",
 });
-
 })
+
+
 router.route("/updateInterests").post(async (req, res, next) => {
   console.log("updating interst");
   const request = req.body;
