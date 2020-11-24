@@ -16,6 +16,10 @@ app.use("/users", user);
 const interest= require ("./routes/interest")
 app.use("/interest", interest);
 
+const interaction= require ("./routes/interaction")
+app.use("/interaction", interaction);
+
+
 
 app.get("/", (req,res)=>{
     res.send("CRUD API running")
