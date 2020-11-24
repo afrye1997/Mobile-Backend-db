@@ -37,7 +37,7 @@ alter table USERS
   //GET THE USER
 router.route("/getAllUsers").get(async (req, res, next) => {
   //so param is called USER_id
-  const USER_id = req.query.USER_id;
+  const USER_id = req.query.USER_id; 
   console.log(USER_id);
   connection.query(
     "SELECT * FROM USERS",
@@ -152,9 +152,10 @@ router.route("/addUser").post(async (req, res, next) => {
     function (error, results, fields) {
       console.log(USER.uid + " was an issue with adding to the db...");
       if (error) {
+        console.log(error)
         return res.status(400).send({
           isError: true,
-          result: error.message,
+          result: error.sqlMessage,
         });
       } else {
         console.log(USER.uid + " was added along with the interests!");
