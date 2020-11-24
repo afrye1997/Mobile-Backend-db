@@ -16,7 +16,7 @@ app.use("/users", user);
 const interest= require ("./routes/interest")
 app.use("/interest", interest);
 
-const interest= require ("./routes/interaction")
+const interaction= require ("./routes/interaction")
 app.use("/interaction", interaction);
 
 
