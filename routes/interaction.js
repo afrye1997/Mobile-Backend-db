@@ -71,7 +71,6 @@ const isMatch = (interactionID, res) => {
         return goodResponse(res, "update was called, but no match");
       });
     }
-    
   });
 };
 
@@ -98,23 +97,25 @@ const isMatch = (interactionID, res) => {
  *
  */
 
-
- router.route("/getMatches").get(async (req, res, next)=>{
-   //returns all users that have matched with a user
-   /**
-    * SELECT * FROM INTERACTIONS WHERE (SUBSTRING(interactionID,1, LEN(interactionID)-1) = 'af027' AND isMatch=YES)
-    * 
-    * SELECT DISTINCT FirstName, lastname 
-FROM 
-  Person.Person
-WHERE 
- SUBSTRING(FirstName, 1, LEN(FirstName)-1) = 'af027'
-
-
-    */
-   const GET_ALL_MATCHES= `SELECT *`
-   connection.query()
- })
+router.route("/getMatches").get(async (req, res, next) => {
+  //returns all users that have matched with a user
+  const user = req.query.USER_id;
+  const GET_ALL_MATCHES = `SELECT * FROM INTERACTIONS WHERE isMatch='yes'`;
+  connection.query(GET_ALL_MATCHES, async (error, result) => {
+    //filter()
+   
+    //output(result, error);
+    var matcheswithUser = result
+      .filter((entry) => entry.interactionID.includes(user))
+      .map((matchedUser) => {
+        return (matchedUser.interactionID = matchedUser.interactionID.replace(
+          user,
+          ""
+        ));
+      });
+    goodResponse(res, matcheswithUser);
+  });
+});
 
 router.route("/addInteraction").post(async (req, res, next) => {
   //so param is called USER_id
