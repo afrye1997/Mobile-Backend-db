@@ -40,34 +40,40 @@ const output = (result, error) => {
   console.log("Error: ", error);
 };
 
-const updateAction=(actionOnWho, action, interactionID, res)=>{
-  const UPDATE_INTERACTION= `UPDATE INTERACTIONS SET ${actionOnWho}="${action}" WHERE interactionID="${interactionID}"`
+const updateAction = (actionOnWho, action, interactionID, res) => {
+  const UPDATE_INTERACTION = `UPDATE INTERACTIONS SET ${actionOnWho}="${action}" WHERE interactionID="${interactionID}"`;
 
-
-  connection.query(UPDATE_INTERACTION, async (result,error)=>{
+  connection.query(UPDATE_INTERACTION, async (result, error) => {
     console.log("updateAction  res: ", result);
     console.log("updateAction err: ", error);
     //alright now we gotta check if there is a match
-  })
-  isMatch(interactionID, res)
+  });
+  isMatch(interactionID, res);
 };
 
-const isMatch=(interactionID, res)=>{
-  const UPDATE_MATCH_STATUS= `UPDATE INTERACTIONS SET isMatch="yes" WHERE interactionID="${interactionID}"`
-  const IS_MATCH= `SELECT user1_likes_user2,user2_likes_user1 FROM INTERACTIONS WHERE interactionID="${interactionID}"`
-  connection.query(IS_MATCH, async (error,result)=>{
-    if (result[0].user1_likes_user2 ===  result[0].user2_likes_user1){
+const isMatch = (interactionID, res) => {
+  const UPDATE_MATCH_STATUS_YES = `UPDATE INTERACTIONS SET isMatch="yes" WHERE interactionID="${interactionID}"`;
+  const UPDATE_MATCH_STATUS_NO = `UPDATE INTERACTIONS SET isMatch="no" WHERE interactionID="${interactionID}"`;
+  const IS_MATCH = `SELECT user1_likes_user2,user2_likes_user1 FROM INTERACTIONS WHERE interactionID="${interactionID}"`;
+  connection.query(IS_MATCH, async (error, result) => {
+    if (
+      result[0].user1_likes_user2 === result[0].user2_likes_user1 &&
+      result[0].user1_likes_user2 === "yes"
+    ) {
       //MATCH WAS MADE!!
-      connection.query(UPDATE_MATCH_STATUS, async(error, result)=> {
-        console.log("YES MATCH, ON GAWD")
-        return goodResponse(res,"A MATCHE AS MADE")
-      })
-    }else{
-      return goodResponse(res, "update was made, but no match yet!!")
+      connection.query(UPDATE_MATCH_STATUS_YES, async (error, result) => {
+        console.log("YES MATCH, ON GAWD");
+        return goodResponse(res, "A MATCHE AS MADE");
+      });
+    } else {
+      connection.query(UPDATE_MATCH_STATUS_NO, async (error, result) => {
+        console.log("NOOOO MATCH, ON GAWD");
+        return goodResponse(res, "update was called, but no match");
+      });
     }
-    //alright now we gotta check if there is a match
-  })
-}
+    
+  });
+};
 
 /**
  * Who likes me?
@@ -92,54 +98,70 @@ const isMatch=(interactionID, res)=>{
  *
  */
 
+
+ router.route("/getMatches").get(async (req, res, next)=>{
+   //returns all users that have matched with a user
+   /**
+    * SELECT * FROM INTERACTIONS WHERE (SUBSTRING(interactionID,1, LEN(interactionID)-1) = 'af027' AND isMatch=YES)
+    * 
+    * SELECT DISTINCT FirstName, lastname 
+FROM 
+  Person.Person
+WHERE 
+ SUBSTRING(FirstName, 1, LEN(FirstName)-1) = 'af027'
+
+
+    */
+   const GET_ALL_MATCHES= `SELECT *`
+   connection.query()
+ })
+
 router.route("/addInteraction").post(async (req, res, next) => {
   //so param is called USER_id
   //GET ALL THE INTERACTIONS
-
+  var isInListAlready = false;
   const { user1, user2, action } = req.body;
   const primaryKey = user1 + user2;
 
   const GET_ALL_INTERACTIONS = "SELECT * FROM INTERACTIONS";
+
   connection.query(GET_ALL_INTERACTIONS, async (error, result) => {
     output(result, error);
+    if (result.length > 0) {
+      for (var i = 0; i < result.length; i++) {
+        var currID = result[i].interactionID;
+        // console.log(result[i].user1);
+        if (isAnagram(primaryKey, currID)) {
+          isInListAlready = true;
+          if (result[i].user1 === user1) {
+            //decipher that post.user1 is actually user1 in the db
+            console.log("we know user1 is the same as the newly added uses1");
+            //now we must do the needed action, update
+            updateAction("user1_likes_user2", action, currID, res);
+          } else {
+            //decipher that post.user1 is actually user2 in the db
+            console.log("we know user2 is the same as the newly added user1");
+            //now we must do the needed action, update
+            updateAction("user2_likes_user1", action, currID, res);
+            console.log(result[i]);
+          }
+        }
+      }
+    }
 
-    if (result.length === 0) {
-      //no entries
-      console.log("in if");
+    if (isInListAlready === false || result.length === 0) {
+      console.log("FJSEHAHKAGF YEET");
       const INSERT_ACTION = `INSERT INTO INTERACTIONS (interactionID, user1, user2, user1_likes_user2, user2_likes_user1, isMatch) VALUES ('${primaryKey}', '${user1}','${user2}','yes','no','no')`;
       connection.query(INSERT_ACTION, async (error, result) => {
         output(error, result);
         goodResponse(res, "added to interaction!!");
       });
-    } else {
-      console.log("in else");
-      output(result, error);
-      //loop over the results object
-      for (var i = 0; i < result.length; i++) {
-        var currID = result[i].interactionID;
-        console.log(result[i].user1);
-        if (isAnagram(primaryKey, currID)) {
-          if (result[i].user1 === user1) {
-            //decipher that post.user1 is actually user1 in the db
-            console.log("we know user1 is the same as the newly added uses1");
-            //now we must do the needed action, update
-            updateAction("user1_likes_user2", "yes", currID, res);
-          } else {
-            //decipher that post.user1 is actually user2 in the db
-            console.log("we know user2 is the same as the newly added user1");
-            //now we must do the needed action, update
-            updateAction("user2_likes_user1", "yes", currID, res);
-            console.log(result[i]);
-          }
-        }
-      }
-
-   
     }
   });
-
 });
 
 module.exports = router;
 
 //https://www.programmersought.com/article/9715939690/
+
+//MUST ADD THE WHOLE DELETING AS WELL
