@@ -19,6 +19,10 @@ app.use("/interest", interest);
 const interaction= require ("./routes/interaction")
 app.use("/interaction", interaction);
 
+const matches= require ("./routes/matches")
+app.use("/matches", matches);
+
+
 
 
 app.get("/", (req,res)=>{
