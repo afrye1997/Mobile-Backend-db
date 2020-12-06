@@ -97,12 +97,11 @@ const isMatch = (interactionID, res) => {
  *
  */
 
- router.route("/getInteractions").get(async(req,res,next)=>{
+ router.route("/getHalfHearts").get(async(req,res,next)=>{
      //returns all users that have matched with a user
   const user = req.query.USER_id;
   const GET_ALL_MATCHES = `SELECT * FROM INTERACTIONS WHERE isMatch='no'`;
   connection.query(GET_ALL_MATCHES, async (error, result) => {
-    //filter()
    
     //output(result, error);
     var matcheswithUser = result
@@ -113,7 +112,6 @@ const isMatch = (interactionID, res) => {
           ""
         ));
       });
-     
     goodResponse(res, matcheswithUser);
   });
 
