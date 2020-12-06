@@ -45,7 +45,7 @@ var matches = async (USER_id) => {
     (item) =>
       item !== USER_id &&
       !getCurrMatches[1].some((alreadyMatched) => item.includes(alreadyMatched))
-  ); 
+  );
   return shuffle(result);
 };
 
@@ -60,23 +60,69 @@ router.route("/getTop3Matches").get(async (req, res, next) => {
   //will have to send the curr user
 });
 
-router.route("/filter").get(async (req, res, next) => {
-    /**
-     * {
-     * user: af027,
-     * food:lt5
-     * hometown: "kc"
-     * music: gt5
-     * reading: eq4}
-     * 
-     * lt, gt,eq 
-     */
-"SELECT * FROM USERS u INNER JOIN INTERESTS i ON u.userID=i.interestUSER WHERE u.userHOMETOWN='kc'"
-     const INNER_JOIN_USERS_INTERESTS= 
-     connection.query(INNER_JOIN_USERS_INTERESTS, (error, result)=> {
-         console.log(result)
-     })
+router.route("/filter").post(async (req, res, next) => {
+  /**
+   * {
+   * user: af027,
+   * food:5
+   * hometown: "kc"
+   * music: 5
+   * reading: 4}
+   *
+   * lt, gt,eq
+   */
+  var filteredArray = [];
+  const userTableFields = [
+    "userHOMETOWN",
+    "userGENDER",
+    "userGRADE_LEVEL",
+    "userGRAD_DATE",
+    "userPROGRAM_EXP",
+    "userSTATUS",
+  ];
+  const interestTableFields = [
+    "interestFOOD",
+    "interestFASHION",
+    "interestOUTDOORS",
+    "interestGAMING",
+    "interestMUSIC",
+    "interestREADING",
+  ];
+  const filterValues = req.body;
 
+  for (column in filterValues) {
+    var value = filterValues[column];
+    console.log(value);
+    console.log(column);
+    if (userTableFields.includes(column)) {
+      console.log("in user table");
+      filteredArray.push("u." + column + "=" + "'" + value + "'");
+    }
+    if (interestTableFields.includes(column)) {
+      console.log("in interest");
+      filteredArray.push("i." + column + "=" + "'" + value + "'");
+    }
+  }
+
+  console.log("filtered", filteredArray);
+  var AND = "";
+  for (var i = 0; i < filteredArray.length; i++) {
+    AND += filteredArray[i] + " AND ";
+  }
+  AND = AND.slice(0, -5);
+
+  const FILTER_QUERY = `SELECT * FROM USERS u INNER JOIN INTERESTS i ON u.userID=i.interestUSER WHERE ${AND}`;
+  connection.query(FILTER_QUERY, (error, result) => {
+    console.log(result);
+    if (result.length === 0) {
+      generatedResponse.goodResponse(res, "no matches, empty array");
+    } else {
+      generatedResponse.goodResponse(res, result);
+    }
+    if (error) {
+      generatedResponse.badResponse(res, error);
+    }
+  });
 });
 
 module.exports = router;
