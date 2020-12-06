@@ -63,6 +63,7 @@ router.route("/getAllUsers").get(async (req, res, next) => {
 
  //GET THE USER
 router.route("/getUser").get(async (req, res, next) => {
+  console.log("get user was called")
   //so param is called USER_id
   const USER_id = req.query.USER_id;
   console.log(USER_id);
@@ -139,11 +140,21 @@ router.route("/updateUser").post(async (req, res, next) => {
 
 // ADD USER
 router.route("/addUser").post(async (req, res, next) => {
-  console.log("addUser was called");
+  console.log("addUser was called!!!!!!!!!!!!!!");
   const { USER } = req.body;
+  console.log("user", USER)
+  //get user status here
+  var userStatus="";
+  if(USER.objectClass.includes('uoaFaculty')){
+    userStatus='faculty'
+  }else if(USER.objectClass.includes('uoaStudent')){
+    userStatus='student'
+  }else if(USER.objectClass.includes('uoaStaff')){
+    userStatus='staff'
+  }
 
-  const INSERT_USER_QUERY = `INSERT INTO  USERS (userID, userFNAME, userLNAME, userEMAIL, userCLASSES) 
-  VALUES ('${USER.uid}', '${USER.givenName}','${USER.sn}','${USER.mail}', '${USER.studentClasses}')`;
+  const INSERT_USER_QUERY = `INSERT INTO  USERS (userID, userFNAME, userLNAME, userEMAIL, userCLASSES, userTEACHING_CLASSES,userSTATUS) 
+  VALUES ('${USER.uid}', '${USER.givenName}','${USER.sn}','${USER.mail}', '${USER.studentClasses}','${USER.facultyClasses}', '${userStatus}')`;
 
   const CREATE_INTEREST_ENTRY = `INSERT INTO INTERESTS VALUES ('${USER.uid}',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);`;
 
