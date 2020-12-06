@@ -97,10 +97,10 @@ const isMatch = (interactionID, res) => {
  *
  */
 
-router.route("/getMatches").get(async (req, res, next) => {
-  //returns all users that have matched with a user
+ router.route("/getInteractions").get(async(req,res,next)=>{
+     //returns all users that have matched with a user
   const user = req.query.USER_id;
-  const GET_ALL_MATCHES = `SELECT * FROM INTERACTIONS WHERE isMatch='yes'`;
+  const GET_ALL_MATCHES = `SELECT * FROM INTERACTIONS WHERE isMatch='no'`;
   connection.query(GET_ALL_MATCHES, async (error, result) => {
     //filter()
    
@@ -113,8 +113,32 @@ router.route("/getMatches").get(async (req, res, next) => {
           ""
         ));
       });
+     
     goodResponse(res, matcheswithUser);
   });
+
+
+
+ })
+
+router.route("/getMatches").get(async (req, res, next) => {
+  //returns all users that have matched with a user
+  const user = req.query.USER_id;
+  const GET_ALL_MATCHES = `SELECT * FROM INTERACTIONS WHERE isMatch='yes'`;
+  connection.query(GET_ALL_MATCHES, async (error, result) => {
+    //filter()
+    //output(result, error);
+    var matcheswithUser = result
+      .filter((entry) => entry.interactionID.includes(user))
+      .map((matchedUser) => {
+        return (matchedUser.interactionID = matchedUser.interactionID.replace(
+          user,
+          ""
+        ));
+      });
+    goodResponse(res, matcheswithUser);
+  });
+
 });
 
 router.route("/addInteraction").post(async (req, res, next) => {
