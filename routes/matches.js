@@ -26,7 +26,7 @@ function shuffle(a) {
 
 var matches = async (USER_id) => {
   console.log("entered");
-  const getCurrMatches = await fetch(
+  var getCurrMatches = await fetch(
     `http://mobile-app.ddns.uark.edu/CRUDapis/interaction/getMatches?USER_id=${USER_id}`
   )
     .then((response) => response.json())
@@ -39,14 +39,25 @@ var matches = async (USER_id) => {
   )
     .then((response) => response.json())
     .then((data) => data.result.map((user) => user.userID));
-  console.log("get all users", getAllUsers);
 
-  var result = getAllUsers.filter(
-    (item) =>
-      item !== USER_id &&
-      !getCurrMatches[1].some((alreadyMatched) => item.includes(alreadyMatched))
-  );
-  return shuffle(result);
+    
+    const whereUser1Liked = `SELECT user2 FROM INTERACTIONS WHERE user1_likes_user2='yes' AND user1='${USER_id}' AND isMatch='no'`;
+  connection.query(whereUser1Liked, async (error, result) => {
+    user1AlreadyLiked = result.map((x) => getCurrMatches[1].push(x.user2));
+    
+    var result = getAllUsers.filter(
+        (item) =>
+          item !== USER_id &&
+          !getCurrMatches[1].some((alreadyMatched) => item.includes(alreadyMatched))
+      );
+    
+      
+      console.log("result", result);
+      return shuffle(result);
+      
+  });
+
+  
 };
 
 router.route("/get3RandomMatches").get(async (req, res, next) => {
