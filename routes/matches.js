@@ -60,7 +60,7 @@ router.route("/getTop3Matches").get(async (req, res, next) => {
   //will have to send the curr user
 });
 
-router.route("/filter").post(async (req, res, next) => {
+router.route("/filter").get(async (req, res, next) => {
     /**
      * {
      * user: af027,
@@ -71,7 +71,12 @@ router.route("/filter").post(async (req, res, next) => {
      * 
      * lt, gt,eq 
      */
-    
+"SELECT * FROM USERS u INNER JOIN INTERESTS i ON u.userID=i.interestUSER WHERE u.userHOMETOWN='kc'"
+     const INNER_JOIN_USERS_INTERESTS= 
+     connection.query(INNER_JOIN_USERS_INTERESTS, (error, result)=> {
+         console.log(result)
+     })
+
 });
 
 module.exports = router;
