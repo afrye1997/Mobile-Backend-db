@@ -102,7 +102,6 @@ const isMatch = (interactionID, res) => {
   const user = req.query.USER_id;
   const GET_ALL_MATCHES = `SELECT * FROM INTERACTIONS WHERE isMatch='no'`;
   connection.query(GET_ALL_MATCHES, async (error, result) => {
-   
     //output(result, error);
     var matcheswithUser = result
       .filter((entry) => entry.interactionID.includes(user))

@@ -4,6 +4,7 @@ const router = express.Router();
 var connection = require("../connection");
 const fetch = require("node-fetch");
 const generatedResponse = require("../globalFunctions.js");
+const { UserFlags } = require("discord.js");
 /**
  * 1/6 (5- (diff in scores)/5) sum up each category!!
  *
@@ -24,7 +25,10 @@ function shuffle(a) {
   return a;
 }
 
-var matches = async (USER_id) => {
+router.route("/get3RandomMatches").get(async (req, res, next) => {
+  //   will have to send the curr user
+  //   get the curr user
+  const USER_id = req.query.USER_id;
   console.log("entered");
   var getCurrMatches = await fetch(
     `http://mobile-app.ddns.uark.edu/CRUDapis/interaction/getMatches?USER_id=${USER_id}`
@@ -40,36 +44,89 @@ var matches = async (USER_id) => {
     .then((response) => response.json())
     .then((data) => data.result.map((user) => user.userID));
 
-    
-    const whereUser1Liked = `SELECT user2 FROM INTERACTIONS WHERE user1_likes_user2='yes' AND user1='${USER_id}' AND isMatch='no'`;
+  const whereUser1Liked = `SELECT user2 FROM INTERACTIONS WHERE user1_likes_user2='yes' AND user1='${USER_id}' AND isMatch='no'`;
   connection.query(whereUser1Liked, async (error, result) => {
     user1AlreadyLiked = result.map((x) => getCurrMatches[1].push(x.user2));
-    
+
     var result = getAllUsers.filter(
-        (item) =>
-          item !== USER_id &&
-          !getCurrMatches[1].some((alreadyMatched) => item.includes(alreadyMatched))
-      );
-    
-      
-      console.log("result", result);
-      return shuffle(result);
-      
+      (item) =>
+        item !== USER_id &&
+        !getCurrMatches[1].some((alreadyMatched) =>
+          item.includes(alreadyMatched)
+        )
+    );
+
+    console.log("result", result);
+
+    generatedResponse.goodResponse(res, shuffle(result));
   });
-
-  
-};
-
-router.route("/get3RandomMatches").get(async (req, res, next) => {
-  //will have to send the curr user
-  //get the curr user
-  const USER_id = req.query.USER_id;
-  matches(USER_id).then((data) => generatedResponse.goodResponse(res, data));
 });
 
 router.route("/getTop3Matches").get(async (req, res, next) => {
-  //will have to send the curr user
+  //   will have to send the curr user
+  //   get the curr user
+  const USER_id = req.query.USER_id;
+  console.log("entered");
+  var getCurrMatches = await fetch(
+    `http://mobile-app.ddns.uark.edu/CRUDapis/interaction/getMatches?USER_id=${USER_id}`
+  )
+    .then((response) => response.json())
+    .then((data) => Object.values(data));
+
+  console.log("get curr matches", getCurrMatches[1]);
+
+  const getAllUsers = await fetch(
+    "http://mobile-app.ddns.uark.edu/CRUDapis/users/getAllUsers"
+  )
+    .then((response) => response.json())
+    .then((data) => data.result.map((user) => user.userID));
+
+  const whereUser1Liked = `SELECT user2 FROM INTERACTIONS WHERE user1_likes_user2='yes' AND user1='${USER_id}' AND isMatch='no'`;
+  connection.query(whereUser1Liked, async (error, result) => {
+    user1AlreadyLiked = result.map((x) => getCurrMatches[1].push(x.user2));
+
+    var result = getAllUsers.filter(
+      (item) =>
+        item !== USER_id &&
+        !getCurrMatches[1].some((alreadyMatched) =>
+          item.includes(alreadyMatched)
+        )
+    );
+
+    //var idk= await an_attempt(result)
+    var othersInterests = [];
+    for (var i = 0; i < result.length; i++) {
+        othersInterests.push(await an_attempt(result[i]));
+    }
+
+    console.log("idk", idk);
+    console.log("plz be last");
+
+    // console.log("result", result);
+
+    //NOW THE CHECKING BEGINS
+    /**
+     * 1/6 (5- (diff in scores)/5) sum up each category!!
+     *
+     */
+
+    generatedResponse.goodResponse(res, shuffle(result));
+  });
+
+  /**
+   * 1/6 (5- (diff in scores)/5) sum up each category!!
+   *
+   */
 });
+
+var an_attempt = (user) => {
+  return new Promise(function (resolve, reject) {
+    const GET_INTERESTS = `SELECT * FROM INTERESTS WHERE interestUSER='${user}'`;
+    connection.query(GET_INTERESTS, (error, result) => {
+      resolve(result);
+    });
+  });
+};
 
 router.route("/filter").post(async (req, res, next) => {
   /**
