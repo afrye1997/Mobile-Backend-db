@@ -97,26 +97,48 @@ const isMatch = (interactionID, res) => {
  *
  */
 
- router.route("/getHalfHearts").get(async(req,res,next)=>{
-     //returns all users that have matched with a user
+var findUsersWhoLike = (interactionID, position) => {
+  return new Promise(function (resolve, reject) {
+    var GET_HALF_HEART = "";
+    if (position === 1) {
+      GET_HALF_HEART = `SELECT user1_likes_user2 AS 'likeStatus', user2 AS 'user' FROM INTERACTIONS WHERE isMatch='no' AND interactionID='${interactionID}'`;
+    }
+    if (position === 2) {
+      GET_HALF_HEART = `SELECT user2_likes_user1 AS 'likeStatus',user1 AS 'user' FROM INTERACTIONS WHERE isMatch='no' AND interactionID='${interactionID}'`;
+    }
+
+    connection.query(GET_HALF_HEART, (error, result) => {
+      console.log(result);
+
+      resolve(result);
+    });
+  });
+};
+
+router.route("/getHalfHearts").get(async (req, res, next) => {
+  //returns all users that have matched with a user
   const user = req.query.USER_id;
+
   const GET_ALL_MATCHES = `SELECT * FROM INTERACTIONS WHERE isMatch='no'`;
   connection.query(GET_ALL_MATCHES, async (error, result) => {
     //output(result, error);
-    var matcheswithUser = result
-      .filter((entry) => entry.interactionID.includes(user))
-      .map((matchedUser) => {
-        return (matchedUser.interactionID = matchedUser.interactionID.replace(
-          user,
-          ""
-        ));
-      });
-    goodResponse(res, matcheswithUser);
+    var noMatcheswithUser = result.filter((entry) =>
+      entry.interactionID.includes(user)
+    );
+    console.log("no matches", noMatcheswithUser);
+
+    var half_heart_gang = [];
+    for (var i = 0; i < noMatcheswithUser.length; i++) {
+      var position =
+        noMatcheswithUser[i].interactionID.indexOf(user) === 0 ? 1 : 2;
+      half_heart_gang.push(
+        await findUsersWhoLike(noMatcheswithUser[i].interactionID, position)
+      );
+    }
+
+    goodResponse(res, half_heart_gang);
   });
-
-
-
- })
+});
 
 router.route("/getMatches").get(async (req, res, next) => {
   //returns all users that have matched with a user
@@ -135,7 +157,6 @@ router.route("/getMatches").get(async (req, res, next) => {
       });
     goodResponse(res, matcheswithUser);
   });
-
 });
 
 router.route("/addInteraction").post(async (req, res, next) => {
