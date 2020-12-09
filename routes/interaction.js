@@ -108,9 +108,13 @@ var findUsersWhoLike = (interactionID, position) => {
     }
 
     connection.query(GET_HALF_HEART, (error, result) => {
-      console.log(result);
+    console.log("result", result[0].get)
+    var userObj={}
+    userObj.likeStatus=result[0].likeStatus;
+    userObj.user=result[0].user;
 
-      resolve(result);
+    console.log("userobject: ", userObj)
+      resolve(userObj);
     });
   });
 };
@@ -208,3 +212,4 @@ module.exports = router;
 //https://www.programmersought.com/article/9715939690/
 
 //MUST ADD THE WHOLE DELETING AS WELL
+
