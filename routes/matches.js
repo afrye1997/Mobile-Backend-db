@@ -25,35 +25,43 @@ function shuffle(a) {
   }
   return a;
 }
+function shufflePPL(a) {
+  console.log(typeof(a))
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 
 var an_attempt = (user) => {
   return new Promise(function (resolve, reject) {
     const GET_INTERESTS = `SELECT * FROM INTERESTS WHERE interestUSER='${user}'`;
     connection.query(GET_INTERESTS, (error, result) => {
-      
       resolve(result);
     });
   });
 };
 
-var teacherList=()=>{
+var teacherList = () => {
   return new Promise(function (resolve, reject) {
     const GET_INTERESTS = `SELECT userID FROM USERS WHERE userSTATUS='faculty' OR userSTATUS='staff';`;
     connection.query(GET_INTERESTS, (error, result) => {
-      var teachersStaff=[]
-      result.map(user=> teachersStaff.push(user.userID))
-      
+      var teachersStaff = [];
+      result.map((user) => teachersStaff.push(user.userID));
+
       resolve(teachersStaff);
     });
   });
-}
+};
 
 router.route("/get3RandomMatches").get(async (req, res, next) => {
   //   will have to send the curr user
   //   get the curr user
-  var NOT_STUDENT_LIST= await (teacherList())
-  console.log("ALLISON", NOT_STUDENT_LIST)
-  
+  var NOT_STUDENT_LIST = await teacherList();
+  console.log("ALLISON", NOT_STUDENT_LIST);
+
   const USER_id = req.query.USER_id;
   console.log("entered");
   var getCurrMatches = await fetch(
@@ -82,18 +90,25 @@ router.route("/get3RandomMatches").get(async (req, res, next) => {
         )
     );
 
-   
     // result =NOT_STUDENT_LIST.fitler(user=> result.includes(user))
-    result= result.map(user=> {
-      if(NOT_STUDENT_LIST.includes(user)){
-        console.log(user+ "wrong list")
-        return "rip"
-      }else{
-        console.log("all good")
-        return user
-      }
-    }).filter(user=> user!=="rip")
+    result = result
+      .map((user) => {
+        if (NOT_STUDENT_LIST.includes(user)) {
+          console.log(user + "wrong list");
+          return "rip";
+        } else {
+          console.log("all good");
+          return user;
+        }
+      })
+      .filter((user) => user !== "rip");
     console.log("result", result);
+
+    var lastArr=[]
+    for(var i=0; i < result.length; i++){
+      lastArr.push(await(getUser(result[i])));
+    }
+    console.log(result)
 
     generatedResponse.goodResponse(res, shuffle(result));
   });
@@ -102,9 +117,9 @@ router.route("/get3RandomMatches").get(async (req, res, next) => {
 router.route("/getTop3Matches").get(async (req, res, next) => {
   //   will have to send the curr user
   //   get the curr user
-  var NOT_STUDENT_LIST= await (teacherList())
+  var NOT_STUDENT_LIST = await teacherList();
   const USER_id = req.query.USER_id;
-  
+
   console.log("entered");
   var getCurrMatches = await fetch(
     `http://mobile-app.ddns.uark.edu/CRUDapis/interaction/getMatches?USER_id=${USER_id}`
@@ -179,28 +194,30 @@ router.route("/getTop3Matches").get(async (req, res, next) => {
       return b.score - a.score;
     });
 
-    scores= scores.map(user=> user.user)
+    scores = scores.map((user) => user.user);
 
-    scores= scores.map(currUser=> {
-      if(NOT_STUDENT_LIST.includes(currUser)){
-        console.log(currUser+ "wrong list")
-        return "rip"
-      }else{
-        console.log("all good")
-        return currUser
-      }
-    }).filter(user=> user!=="rip")
-
+    scores = scores
+      .map((currUser) => {
+        if (NOT_STUDENT_LIST.includes(currUser)) {
+          console.log(currUser + "wrong list");
+          return "rip";
+        } else {
+          console.log("all good");
+          return currUser;
+        }
+      })
+      .filter((user) => user !== "rip");
 
     console.log("result", scores);
+    //get all user objecfr
 
+    var lastArr=[]
+    for(var i=0; i < scores.length; i++){
+      lastArr.push(await(getUser(scores[i])));
+    }
+    console.log(lastArr)
 
-
-
-
-
-
-    generatedResponse.goodResponse(res, scores);
+    generatedResponse.goodResponse(res, lastArr);
   });
 
   /**
@@ -208,6 +225,18 @@ router.route("/getTop3Matches").get(async (req, res, next) => {
    *
    */
 });
+
+var getUser= (user) =>{
+  return new Promise(function(resolve, reject){
+    const  GET_USER= `SELECT * FROM USERS WHERE userID='${user}'`;
+    connection.query(GET_USER, async(error, result)=>{
+      console.log(result)
+      console.log(error)
+      resolve(result)
+    })
+  })
+}
+
 
 var boringMath = (currScore, otherScore) => {
   console.log("curr", currScore);
@@ -246,36 +275,34 @@ var matchingAlgo = (currUserInterest, otherUser) => {
   });
 };
 
-router.route("/getUsersFromClass").get(async(req,res, next)=>{
-  const CLASS= req.query.class;
-  var studentsFromTeacher=[]
-  var classesList=[]
+router.route("/getUsersFromClass").get(async (req, res, next) => {
+  const CLASS = req.query.class;
+  var studentsFromTeacher = [];
+  var classesList = [];
 
-  const GET_ALL_STUDENTS= "SELECT userID, userCLASSES FROM USERS WHERE userStatus='student';"
-  connection.query(GET_ALL_STUDENTS, async(error, result)=>{
-    console.log(result)
-    studentsFromTeacher= result.map(user=> {
-      console.log(user.userID)
-      classesList= user.userCLASSES.split(",")
-      if(classesList.includes(CLASS)){
-        console.log(user.userID+" is in this class!!")
-        return (user.userID)
-      }
-      return "rip"
-  }).filter(user=> user!="rip")
+  const GET_ALL_STUDENTS =
+    "SELECT userID, userCLASSES FROM USERS WHERE userStatus='student';";
+  connection.query(GET_ALL_STUDENTS, async (error, result) => {
+    console.log(result);
+    studentsFromTeacher = result
+      .map((user) => {
+        console.log(user.userID);
+        classesList = user.userCLASSES.split(",");
+        if (classesList.includes(CLASS)) {
+          console.log(user.userID + " is in this class!!");
+          return user.userID;
+        }
+        return "rip";
+      })
+      .filter((user) => user != "rip");
 
- // studentsFromTeacher.filter(user=> user==null)
-  console.log(studentsFromTeacher)
-  generatedResponse.goodResponse(res, studentsFromTeacher)
-
-})
-
-
-})
-
+    // studentsFromTeacher.filter(user=> user==null)
+    console.log(studentsFromTeacher);
+    generatedResponse.goodResponse(res, studentsFromTeacher);
+  });
+});
 
 router.route("/filter").post(async (req, res, next) => {
-
   var filteredArray = [];
   const userTableFields = [
     "userHOMETOWN",
@@ -294,7 +321,6 @@ router.route("/filter").post(async (req, res, next) => {
     "interestREADING",
   ];
   const filterValues = req.body;
-
 
   for (column in filterValues) {
     var value = filterValues[column];
